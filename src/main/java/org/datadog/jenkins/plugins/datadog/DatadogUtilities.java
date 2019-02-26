@@ -319,7 +319,7 @@ public class DatadogUtilities {
      * Getter function to return either the saved hostname global configuration,
      * or the hostname that is set in the Jenkins host itself. Returns null if no
      * valid hostname is found.
-     * 
+     *
      * Tries, in order:
      * Jenkins configuration
      * Jenkins hostname environment variable
