@@ -201,7 +201,6 @@ public class DatadogUtilities {
      * This method parses the contents of the configured Datadog tags. If they are present.
      * Takes the current build as a parameter. And returns the expanded tags and their
      * values in a HashMap.
-     * <p>
      * Always returns a HashMap, that can be empty, if no tagging is configured.
      *
      * @param run      - Current build
@@ -251,6 +250,21 @@ public class DatadogUtilities {
             }
         }
 
+        String jobName = run.getParent().getFullName();
+        if( DatadogBuildStep.tagPool.containsKey(jobName)) {
+            String tags = DatadogBuildStep.tagPool.get(jobName);
+            DatadogBuildStep.tagPool.remove(jobName);
+            for(String tag : tags.split(" ")) {
+                String[] expanded = run.getEnvironment(listener).expand(tag).split("=");
+                if( expanded.length > 1 ) {
+                    map.put(expanded[0], expanded[1]);
+                    logger.fine(String.format("Emitted tag %s:%s", expanded[0], expanded[1]));
+                } else {
+                    logger.fine(String.format("Ignoring the tag %s. It is empty.", tag));
+                }
+            }
+        }
+
         return map;
     }
 
@@ -267,7 +281,6 @@ public class DatadogUtilities {
      * Getter function to return either the saved hostname global configuration,
      * or the hostname that is set in the Jenkins host itself. Returns null if no
      * valid hostname is found.
-     * <p>
      * Tries, in order:
      * Jenkins configuration
      * Jenkins hostname environment variable
