@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/DataDog/jenkins-datadog-plugin.svg?branch=master)](https://travis-ci.org/DataDog/jenkins-datadog-plugin)
+[![Build Status](https://dev.azure.com/datadoghq/jenkins-datadog-plugin/_apis/build/status/DataDog.jenkins-datadog-plugin?branchName=master)](https://dev.azure.com/datadoghq/jenkins-datadog-plugin/_build/latest?definitionId=18&branchName=master)
 
 # Jenkins Datadog Plugin
 A Jenkins plugin used to forward metrics, events, and service checks to an account at Datadog, automatically.
@@ -118,7 +118,7 @@ First of all and most importantly, **thank you** for sharing.
 If you want to submit code, please fork this repository and submit pull requests against the `master` branch.
 For more information, checkout the [contributing guidelines](https://github.com/DataDog/datadog-agent/blob/master/CONTRIBUTING.md) for our agent. We'll attempt to follow these here, as well, where it makes sense.
 
-Check out the [development document](DEVELOPMENT.md) for tips on spinning up a quick development environment locally.
+Check out the [development document](TESTING.md) for tips on spinning up a quick development environment locally.
 
 # Manual Testing
 In order to keep track of some testing procedures for ensuring proper functionality of the Datadog Plugin on Jenkins, there is a [testing document](TESTING.md).
