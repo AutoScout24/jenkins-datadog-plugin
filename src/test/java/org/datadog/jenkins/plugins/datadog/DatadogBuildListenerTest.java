@@ -6,6 +6,7 @@ import hudson.model.*;
 import jenkins.model.Jenkins;
 import org.datadog.jenkins.plugins.datadog.clients.DatadogClientStub;
 import org.datadog.jenkins.plugins.datadog.clients.DatadogStatsDClientStub;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +38,7 @@ public class DatadogBuildListenerTest {
         when(DatadogUtilities.isJobTracked(anyString())).thenReturn(true);
         when(DatadogUtilities.isApiKeyNull()).thenReturn(false);
         when(DatadogUtilities.isTagNodeEnable()).thenReturn(true);
+        when(DatadogUtilities.getHostname("test-hostname-2")).thenReturn("test-hostname-2");
     }
 
     @Test
@@ -94,13 +96,14 @@ public class DatadogBuildListenerTest {
 
         datadogBuildListener.onCompleted(run, mock(TaskListener.class));
 
-        String[] expectedTags = new String[4];
+        String[] expectedTags = new String[5];
         expectedTags[0] = "job:ParentFullName/JobName";
         expectedTags[1] = "node:test-node";
         expectedTags[2] = "result:SUCCESS";
         expectedTags[3] = "branch:test-branch";
-        client.assertMetric("jenkins.job.duration", 123, "null", expectedTags);
-        client.assertServiceCheck("jenkins.job.status", 0, "null", expectedTags);
+        expectedTags[4] = "host:test-hostname-2";
+        client.assertMetric("jenkins.job.duration", 123, "test-hostname-2", expectedTags);
+        client.assertServiceCheck("jenkins.job.status", 0, "test-hostname-2", expectedTags);
         client.assertedAllMetricsAndServiceChecks();
 
     }
@@ -134,13 +137,14 @@ public class DatadogBuildListenerTest {
 
         datadogBuildListener.onCompleted(run, mock(TaskListener.class));
 
-        String[] expectedTags = new String[4];
+        String[] expectedTags = new String[5];
         expectedTags[0] = "job:ParentFullName/JobName";
         expectedTags[1] = "node:test-node";
         expectedTags[2] = "result:SUCCESS";
         expectedTags[3] = "branch:test-branch";
-        client.assertMetric("jenkins.job.duration", 0, "null", expectedTags);
-        client.assertServiceCheck("jenkins.job.status", 0, "null", expectedTags);
+        expectedTags[4] = "host:test-hostname-2";
+        client.assertMetric("jenkins.job.duration", 0, "test-hostname-2", expectedTags);
+        client.assertServiceCheck("jenkins.job.status", 0, "test-hostname-2", expectedTags);
         client.assertedAllMetricsAndServiceChecks();
     }
 
@@ -173,11 +177,12 @@ public class DatadogBuildListenerTest {
         when(run.getParent()).thenReturn(job);
 
         datadogBuildListener.onCompleted(run, mock(TaskListener.class));
-        String[] expectedTags = new String[4];
+        String[] expectedTags = new String[5];
         expectedTags[0] = "job:ParentFullName/JobName";
         expectedTags[1] = "node:test-node";
         expectedTags[2] = "result:SUCCESS";
         expectedTags[3] = "branch:test-branch";
+        expectedTags[4] = "host:test-hostname-2";
 
         statsd.assertMetric("completed", 1, expectedTags);
         statsd.assertMetric("leadtime", 1234, expectedTags);

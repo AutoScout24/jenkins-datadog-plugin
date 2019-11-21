@@ -255,11 +255,13 @@ public class BuildFinishedEventTest {
         Assert.assertTrue(o.getLong("date_happened") == 0);
         Object[] sortedTags = o.getJSONArray("tags").toArray();
         Arrays.sort(sortedTags);
-        Assert.assertTrue(sortedTags.length == 4);
+
+        Assert.assertTrue(sortedTags.length == 5);
         Assert.assertTrue(Objects.equals(sortedTags[0], "branch:test-branch"));
-        Assert.assertTrue(Objects.equals(sortedTags[1], "job:ParentFullName/JobName"));
-        Assert.assertTrue(Objects.equals(sortedTags[2], "node:test-node"));
-        Assert.assertTrue(Objects.equals(sortedTags[3], "result:SUCCESS"));
+        Assert.assertTrue(Objects.equals(sortedTags[1], "host:test-hostname-1"));
+        Assert.assertTrue(Objects.equals(sortedTags[2], "job:ParentFullName/JobName"));
+        Assert.assertTrue(Objects.equals(sortedTags[3], "node:test-node"));
+        Assert.assertTrue(Objects.equals(sortedTags[4], "result:SUCCESS"));
         Assert.assertTrue(Objects.equals(o.getString("source_type_name"), "jenkins"));
         Assert.assertTrue(Objects.equals(o.getString("title"), "ParentFullName/JobName build #2 success on test-hostname-1"));
         Assert.assertTrue(o.getString("text").contains("[See results for build #2](http://build_url.com) (0.00 secs)"));
@@ -306,12 +308,13 @@ public class BuildFinishedEventTest {
         Assert.assertTrue(o.getLong("date_happened") == 0);
         Object[] sortedTags = o.getJSONArray("tags").toArray();
         Arrays.sort(sortedTags);
-        Assert.assertTrue(sortedTags.length == 5);
+        Assert.assertTrue(sortedTags.length == 6);
         Assert.assertTrue(Objects.equals(sortedTags[0], "branch:csv-branch"));
-        Assert.assertTrue(Objects.equals(sortedTags[1], "job:ParentFullName/JobName"));
-        Assert.assertTrue(Objects.equals(sortedTags[2], "result:SUCCESS"));
-        Assert.assertTrue(Objects.equals(sortedTags[3], "tag1:value1"));
-        Assert.assertTrue(Objects.equals(sortedTags[4], "tag2:value2"));
+        Assert.assertTrue(Objects.equals(sortedTags[1], "host:test-hostname-1"));
+        Assert.assertTrue(Objects.equals(sortedTags[2], "job:ParentFullName/JobName"));
+        Assert.assertTrue(Objects.equals(sortedTags[3], "result:SUCCESS"));
+        Assert.assertTrue(Objects.equals(sortedTags[4], "tag1:value1"));
+        Assert.assertTrue(Objects.equals(sortedTags[5], "tag2:value2"));
         Assert.assertTrue(Objects.equals(o.getString("source_type_name"), "jenkins"));
         Assert.assertTrue(Objects.equals(o.getString("title"), "ParentFullName/JobName build #2 success on test-hostname-1"));
         Assert.assertTrue(o.getString("text").contains("[See results for build #2](http://build_url.com) (0.00 secs)"));

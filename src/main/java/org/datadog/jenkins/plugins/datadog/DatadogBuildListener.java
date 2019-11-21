@@ -1,5 +1,6 @@
 package org.datadog.jenkins.plugins.datadog;
 
+import com.cloudbees.workflow.rest.external.RunExt;
 import com.timgroup.statsd.NonBlockingStatsDClient;
 import com.timgroup.statsd.StatsDClient;
 import com.timgroup.statsd.StatsDClientException;
@@ -15,8 +16,10 @@ import org.datadog.jenkins.plugins.datadog.clients.DatadogHttpClient;
 import org.datadog.jenkins.plugins.datadog.events.BuildFinishedEventImpl;
 import org.datadog.jenkins.plugins.datadog.events.BuildStartedEventImpl;
 import org.datadog.jenkins.plugins.datadog.model.BuildData;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+import com.cloudbees.workflow.rest.external.StageNodeExt;
 
 import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
@@ -163,6 +166,26 @@ public class DatadogBuildListener extends RunListener<Run> implements Describabl
                 buildData.getDuration(0L),
                 buildData.getHostname("null"),
                 tags);
+        logger.fine(String.format("[%s]: Duration: %s", buildData.getJob(null), toTimeString(buildData.getDuration(0L))));
+
+        if (run instanceof WorkflowRun) {
+            RunExt extRun = RunExt.create((WorkflowRun) run);
+            long pauseduration = 0;
+            for (StageNodeExt stage : extRun.getStages()) {
+                pauseduration += stage.getPauseDurationMillis();
+            }
+            client.gauge("jenkins.job.pauseduration",
+                    pauseduration / 1000,
+                    buildData.getHostname("null"),
+                    tags);
+            logger.fine(String.format("[%s]: Pause Duration: %s", buildData.getJob(null), toTimeString(pauseduration)));
+            long buildduration = run.getDuration() - pauseduration;
+            client.gauge("jenkins.job.buildduration",
+                    buildduration / 1000,
+                    buildData.getHostname("null"),
+                    tags);
+            logger.fine(String.format("[%s]: Build Duration (without pause): %s", buildData.getJob(null), toTimeString(buildduration)));
+        }
 
         // Send a service check
         String hostname = buildData.getHostname("null");
@@ -205,20 +228,25 @@ public class DatadogBuildListener extends RunListener<Run> implements Describabl
                     long leadTime = run.getDuration() + mttr;
 
                     statsd.gauge("leadtime", leadTime / 1000.0, statsdTags);
+                    logger.fine(String.format("[%s]: Lead time: %s", buildData.getJob(null), toTimeString(leadTime)));
                     if (cycleTime > 0) {
                         statsd.gauge("cycletime", cycleTime / 1000.0, statsdTags);
+                        logger.fine(String.format("[%s]: Cycle Time: %s", buildData.getJob(null), toTimeString(cycleTime)));
                     }
                     if (mttr > 0) {
                         statsd.gauge("mttr", mttr / 1000.0, statsdTags);
+                        logger.fine(String.format("[%s]: MTTR: %s", buildData.getJob(null), toTimeString(mttr)));
                     }
                 } else {
                     long feedbackTime = run.getDuration();
                     long mtbf = getMeanTimeBetweenFailure(run);
 
                     statsd.gauge("feedbacktime", feedbackTime / 1000.0, statsdTags);
+                    logger.fine(String.format("[%s]: Feedback Time: %s", buildData.getJob(null), toTimeString(feedbackTime)));
 
                     if (mtbf > 0) {
                         statsd.gauge("mtbf", mtbf / 1000.0, statsdTags);
+                        logger.fine(String.format("[%s]: MTBF: %s", buildData.getJob(null), toTimeString(mtbf)));
                     }
                 }
 
@@ -276,6 +304,13 @@ public class DatadogBuildListener extends RunListener<Run> implements Describabl
         }
 
         return match;
+    }
+
+    private String toTimeString(long millis) {
+        return String.format("%d min, %d sec",
+                TimeUnit.MILLISECONDS.toMinutes(millis),
+                TimeUnit.MILLISECONDS.toSeconds(millis) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
     }
 
     private long getMeanTimeBetweenFailure(Run<?, ?> run) {

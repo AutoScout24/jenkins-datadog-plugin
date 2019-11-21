@@ -92,6 +92,9 @@ public class BuildData {
         if (branch != null && !extra.containsKey("branch")) {
             tags.add("branch:" + getBranch("null"));
         }
+        if (hostname != null) {
+            tags.add("host:" + getHostname("null"));
+        }
 
         //Add the extra tags here
         for (Map.Entry entry : extra.entrySet()) {
