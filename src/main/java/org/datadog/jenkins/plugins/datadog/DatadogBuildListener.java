@@ -171,14 +171,26 @@ public class DatadogBuildListener extends RunListener<Run> implements Describabl
         if (run instanceof WorkflowRun) {
             RunExt extRun = RunExt.create((WorkflowRun) run);
             long pauseduration = 0;
+            long checkoutduration = 0;
             for (StageNodeExt stage : extRun.getStages()) {
                 pauseduration += stage.getPauseDurationMillis();
+                if (stage.getName().contains("Checkout SCM")) {
+                    checkoutduration += stage.getDurationMillis();
+                }
             }
+
+            client.gauge("jenkins.job.checkoutduration",
+                    checkoutduration / 1000,
+                    buildData.getHostname("null"),
+                    tags);
+            logger.fine(String.format("[%s]: Checkout Duration: %s", buildData.getJob(null), toTimeString(checkoutduration)));
+
             client.gauge("jenkins.job.pauseduration",
                     pauseduration / 1000,
                     buildData.getHostname("null"),
                     tags);
             logger.fine(String.format("[%s]: Pause Duration: %s", buildData.getJob(null), toTimeString(pauseduration)));
+
             long buildduration = run.getDuration() - pauseduration;
             client.gauge("jenkins.job.buildduration",
                     buildduration / 1000,
