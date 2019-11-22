@@ -6,7 +6,6 @@ import hudson.model.*;
 import jenkins.model.Jenkins;
 import org.datadog.jenkins.plugins.datadog.clients.DatadogClientStub;
 import org.datadog.jenkins.plugins.datadog.clients.DatadogStatsDClientStub;
-import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -192,7 +191,7 @@ public class DatadogBuildListenerTest {
     private DatadogBuildListener.DescriptorImpl descriptor(DatadogClient client, StatsDClient statsd) {
         DatadogBuildListener.DescriptorImpl descriptor = mock(DatadogBuildListener.DescriptorImpl.class);
         when(descriptor.leaseDatadogClient()).thenReturn(client);
-        when(descriptor.leaseStatDClient()).thenReturn(statsd);
+        when(descriptor.leaseStatsDClient()).thenReturn(statsd);
         if (statsd != null) {
             when(descriptor.getDaemonHost()).thenReturn("localhost:1234");
         }

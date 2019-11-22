@@ -215,7 +215,7 @@ public class DatadogBuildListener extends RunListener<Run> implements Describabl
             try {
                 // The client is a thread pool so instead of creating a new instance of the pool
                 // we lease the exiting one registered with Jenkins.
-                statsd = getDescriptor().leaseStatDClient();
+                statsd = getDescriptor().leaseStatsDClient();
                 statsd.incrementCounter("completed", statsdTags);
                 logger.fine(String.format("Attempted to send 'completed' counter with tags: %s",
                         Arrays.toString(statsdTags)));
@@ -728,7 +728,7 @@ public class DatadogBuildListener extends RunListener<Run> implements Describabl
         /**
          * @return - A {@link StatsDClient} lease for this registered {@link RunListener}
          */
-        public StatsDClient leaseStatDClient() {
+        public StatsDClient leaseStatsDClient() {
             try {
                 if (statsDClient == null) {
                     statsDClient = new NonBlockingStatsDClient("jenkins.job", daemonHost.split(":")[0],
