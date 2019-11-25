@@ -191,7 +191,7 @@ public class DatadogBuildListener extends RunListener<Run> implements Describabl
                     tags);
             logger.fine(String.format("[%s]: Pause Duration: %s", buildData.getJob(null), toTimeString(pauseduration)));
 
-            long buildduration = run.getDuration() - pauseduration;
+            long buildduration = run.getDuration() - pauseduration - checkoutduration;
             client.gauge("jenkins.job.buildduration",
                     buildduration / 1000,
                     buildData.getHostname("null"),
