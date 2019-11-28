@@ -1,6 +1,7 @@
 package org.datadog.jenkins.plugins.datadog;
 
 import com.cloudbees.workflow.rest.external.RunExt;
+import com.cloudbees.workflow.rest.external.StageNodeExt;
 import com.timgroup.statsd.NonBlockingStatsDClient;
 import com.timgroup.statsd.StatsDClient;
 import com.timgroup.statsd.StatsDClientException;
@@ -19,7 +20,6 @@ import org.datadog.jenkins.plugins.datadog.model.BuildData;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
-import com.cloudbees.workflow.rest.external.StageNodeExt;
 
 import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
@@ -168,6 +168,7 @@ public class DatadogBuildListener extends RunListener<Run> implements Describabl
                 tags);
         logger.fine(String.format("[%s]: Duration: %s", buildData.getJob(null), toTimeString(buildData.getDuration(0L))));
 
+        // Everything under this conditional code is to be replaced by the durations extracted from the graphwalker
         if (run instanceof WorkflowRun) {
             RunExt extRun = RunExt.create((WorkflowRun) run);
             long pauseduration = 0;
